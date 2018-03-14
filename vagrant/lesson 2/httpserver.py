@@ -1,6 +1,17 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import cgi
 
+# import CRUD Operations from Lesson 1
+from database_setup import Base, Restaurant, MenuItem
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+# Create session and connect to DB
+engine = create_engine('sqlite:///restaurantmenu.db')
+Base.metadata.bind = engine
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+
 
 # HTTPRequestHandler class
 class WebServerHandler(BaseHTTPRequestHandler):
@@ -29,6 +40,21 @@ class WebServerHandler(BaseHTTPRequestHandler):
             message += "<html><body>&#161Hola<a href='/hello'>Back to Hello</a></body></html>"
             self.wfile.write(bytes(message, 'utf8'))
             print(message)
+            return
+        if self.path.endswith("/restaurants"):
+            restaurants = session.query(Restaurant).all()
+            output = ""
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            output += "<html><body>"
+            for restaurant in restaurants:
+                print(restaurant.name)
+                output += restaurant.name
+                output += "</br></br></br>"
+
+            output += "</body></html>"
+            self.wfile.write(bytes(output, 'utf8'))
             return
         else:
             self.send_error(404, 'File Not Found: %s' % self.path)
