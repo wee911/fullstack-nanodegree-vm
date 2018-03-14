@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import cgi
 
+
 # HTTPRequestHandler class
 class WebServerHandler(BaseHTTPRequestHandler):
 
@@ -14,10 +15,11 @@ class WebServerHandler(BaseHTTPRequestHandler):
             message = ""
             message += "<html><body>"
             message += "<h1>Hello!</h1>"
-            message += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
+            message += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like 
+            me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form> '''
             message += "</body></html>"
             self.wfile.write(bytes(message, 'utf8'))
-            print (message)
+            print(message)
             return
         if self.path.endswith("/hola"):
             self.send_response(200)
@@ -26,12 +28,12 @@ class WebServerHandler(BaseHTTPRequestHandler):
             message = ""
             message += "<html><body>&#161Hola<a href='/hello'>Back to Hello</a></body></html>"
             self.wfile.write(bytes(message, 'utf8'))
-            print (message)
+            print(message)
             return
         else:
             self.send_error(404, 'File Not Found: %s' % self.path)
 
-      # POST
+    # POST
     def do_POST(self):
         print(self)
         print(1)
@@ -48,12 +50,11 @@ class WebServerHandler(BaseHTTPRequestHandler):
         output += "<html><body>"
         output += "<h2>ok. how about this:</h2>"
         output += "<h1> %s </h1>" % messagecontent[0].decode("utf-8")
-        output += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
+        output += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to 
+        say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form> '''
         output += "</body></html>"
         self.wfile.write(bytes(output, 'utf8'))
         print(output)
-
-
 
 
 def main():
@@ -63,10 +64,10 @@ def main():
         port = 8081
         server_address = ('', port)
         httpd = HTTPServer(server_address, WebServerHandler)
-        print ("Web Server running on port %s" % port)
+        print("Web Server running on port %s" % port)
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print ("^C entered, stopping web server....")
+        print("^C entered, stopping web server....")
         httpd.socket.close()
 
 
