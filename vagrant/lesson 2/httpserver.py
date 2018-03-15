@@ -47,6 +47,8 @@ class WebServerHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
+            # Objective 3 Step 1 - Create a Link to create a new menu item
+            output += "<a href = '/restaurants/new' > Make a New Restaurant Here </a></br></br>"
             output += "<html><body>"
             for restaurant in restaurants:
                 print(restaurant.name)
@@ -60,31 +62,42 @@ class WebServerHandler(BaseHTTPRequestHandler):
             output += "</body></html>"
             self.wfile.write(bytes(output, 'utf8'))
             return
+        if self.path.endswith("/restaurants/new"):
+            output = ""
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            output += "<html><body>"
+            output += "<h1>Make a New Restaurant</h1>"
+            output += "<form method = 'POST' enctype='multipart/form-data' action = '/restaurants/new'>"
+            output += "<input name = 'newRestaurantName' type = 'text' placeholder = 'New Restaurant Name' > "
+            output += "<input type='submit' value='Create'>"
+            output += "</form></body></html>"
+            self.wfile.write(bytes(output, 'utf8'))
+            return
         else:
             self.send_error(404, 'File Not Found: %s' % self.path)
 
     # POST
     def do_POST(self):
-        print(self)
-        print(1)
-        self.send_response(301)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        ctype, pdict = cgi.parse_header(self.headers['content-type'])
-        pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
-        if ctype == "multipart/form-data":
-            fields = cgi.parse_multipart(self.rfile, pdict)
-            messagecontent = fields.get('message')
+        try:
+            if self.path.endswith("/restaurants/new"):
+                ctype, pdict = cgi.parse_header(self.headers['content-type'])
+                pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
+                if ctype == "multipart/form-data":
+                    fields = cgi.parse_multipart(self.rfile, pdict)
+                    messagecontent = fields.get('newRestaurantName')
+                    print(messagecontent[0].decode("utf-8"))
+                    newRestaurant = Restaurant(name=messagecontent[0].decode("utf-8"))
+                    session.add(newRestaurant)
+                    session.commit()
 
-        output = ""
-        output += "<html><body>"
-        output += "<h2>ok. how about this:</h2>"
-        output += "<h1> %s </h1>" % messagecontent[0].decode("utf-8")
-        output += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to 
-        say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form> '''
-        output += "</body></html>"
-        self.wfile.write(bytes(output, 'utf8'))
-        print(output)
+                    self.send_response(301)
+                    self.send_header('Content-type', 'text/html')
+                    self.send_header('Location', '/restaurants')
+                    self.end_headers()
+        except:
+            pass
 
 
 def main():
