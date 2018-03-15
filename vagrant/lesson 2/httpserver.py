@@ -51,6 +51,10 @@ class WebServerHandler(BaseHTTPRequestHandler):
             for restaurant in restaurants:
                 print(restaurant.name)
                 output += restaurant.name
+                output += "</br>"
+                output += "<a href='#'>Edit</a>"
+                output += "</br>"
+                output += "<a href='#'>Delete</a>"
                 output += "</br></br></br>"
 
             output += "</body></html>"
