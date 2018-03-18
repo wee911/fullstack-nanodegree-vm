@@ -14,6 +14,12 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+@app.route('/restaurants/JSON')
+def restaurantsJSON():
+    restaurant = session.query(Restaurant)
+    return jsonify(restaurants=[i.serialize for i in restaurant])
+
+
 
 @app.route('/restaurants/<int:restaurant_id>/menu/JSON')
 def restaurantMenuJSON(restaurant_id):
@@ -29,8 +35,51 @@ def menuItermJSON(restaurant_id, menu_id):
     return jsonify(MenuItems=menuIterm.serialize)
 
 
-# ADD JSON API ENDPOINT HERE
 @app.route('/')
+@app.route('/restaurants')
+def showRestaurants():
+    restaurants = session.query(Restaurant).all()
+    return render_template('restaurants.html', restaurants=restaurants)
+
+
+@app.route('/restaurant/new', methods=['GET', 'POST'])
+def newRestaurant():
+    if request.method == 'POST':
+        name = request.form['name']
+        if name:
+            newRestaurant = Restaurant(name=name)
+            session.add(newRestaurant)
+            session.commit()
+            return redirect(url_for('showRestaurants'))
+    else:
+        return render_template('newRestaurant.html')
+
+
+@app.route('/restaurant/<int:restaurant_id>/edit', methods=['GET', 'POST'])
+def editRestaurant(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    if request.method == 'POST':
+        name = request.form['name']
+        if name:
+            restaurant.name = name
+            session.add(restaurant)
+            session.commit()
+            return redirect(url_for('showRestaurants'))
+    else:
+        return render_template('editRestaurant.html', restaurant=restaurant)
+
+
+@app.route('/restaurant/<int:restaurant_id>/delete', methods=['GET', 'POST'])
+def deleteRestaurant(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    if request.method == 'POST':
+            session.delete(restaurant)
+            session.commit()
+            return redirect(url_for('showRestaurants'))
+    else:
+        return render_template('deleteRestaurant.html', restaurant=restaurant)
+
+
 @app.route('/restaurants/<int:restaurant_id>')
 def restaurantMenu(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
